@@ -177,15 +177,27 @@ fn hl_mog(qr: &QR, threshold: f64) {
 }
 
 const POP_SIZE: usize = 200;
-const TEXT: &str =
-    "sus";
 
-const ERROR_LIMIT: u32 = 75;
+const ERROR_LIMIT: u32 = 40;
 
 fn main() {
+    let text = if let Some(text) = std::env::args().nth(1) {
+        text
+    } else {
+        eprintln!("Expected text as first argument");
+        return;
+    };
+
+    let version = if let Some(version) = std::env::args().nth(2).and_then(|x| x.parse::<u32>().ok()) {
+        version
+    } else {
+        eprintln!("Expected version as second argument");
+        return;
+    };
+
     let mut rng = rand::thread_rng();
 
-    let orig_qr = QR::make(TEXT.as_bytes(), VERSION);
+    let orig_qr = QR::make(text.as_bytes(), version);
     // qr.dump_hl(|x, y| qr.is_functional(x, y));
     // qr.dump();
     // return;
@@ -202,19 +214,18 @@ fn main() {
         scored.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap());
         let (score, best) = &scored[0];
 
-        if epoch % 1 == 0 {
-            println!(
-                "\x1b[1;1HEpoch {epoch:5}, best with score {score:6}, decodes to {:?}:",
-                best.decode()
-            );
-            hl_mog(best, 0.5);
-            // println!();
-            // println!();
-            // println!();
-            best.dump_hl(|x, y| {
-                best.get_at(x, y) != orig_qr.get_at(x, y)
-            })
-        }
+        println!(
+            "\x1b[1;1HEpoch {epoch:5}, best with score {score:6}, decodes to {:?}:",
+            best.decode()
+        );
+        // best.dump();
+        hl_mog(best, 1.5);
+        // println!();
+        // println!();
+        // println!();
+        // best.dump_hl(|x, y| {
+        //     best.get_at(x, y) != orig_qr.get_at(x, y)
+        // })
 
         population.push(best.clone());
 
@@ -241,7 +252,7 @@ fn main() {
             }
 
             match qr.decode() {
-                Ok((x, count)) if x.starts_with(TEXT) && count < ERROR_LIMIT => {
+                Ok((x, count)) if x == text && count < ERROR_LIMIT => {
                     population.push(qr);
                 }
                 _ => continue,
