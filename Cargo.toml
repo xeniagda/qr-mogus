@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 bardecoder = { path = "bardecoder-patch" }
-qrcode = "0.12.0"
+qrcode = { path = "qrcode-rust" } #"0.12.0"
 rand = "0.8.5"
 rayon = "1.5.2"

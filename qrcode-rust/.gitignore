@@ -1,0 +1,7 @@
+/target
+*.swp
+*.swo
+.DS_Store
+*.o
+__pycache__
+Cargo.lock

@@ -18,6 +18,54 @@ unsafe impl Send for QR {}
 unsafe impl Sync for QR {}
 
 impl QR {
+    pub fn from_code(code: qrcode::QrCode) -> QR {
+        let version = if let qrcode::Version::Normal(x) = code.version() {
+            x as u32
+        } else {
+            panic!("aoeu micro moment");
+        };
+        let mut functional = HashSet::new();
+        for x in 0..code.width() {
+            for y in 0..code.width() {
+                let i = x + y * code.width();
+                if code.is_functional(x, y) {
+                    functional.insert(i);
+                }
+            }
+        }
+        // version markers
+        for s in 0..4 {
+            for l in 0..7 {
+                let x = code.width() - 11 + s;
+                let y = l;
+
+                let i = x + y * code.width();
+                let i_flip = y + x * code.width();
+
+                functional.insert(i);
+                functional.insert(i_flip);
+            }
+        }
+
+        let cdata = code.to_colors();
+        let idata: Vec<_> = cdata
+            .into_iter()
+            .map(|x| if x == qrcode::Color::Light { 1 } else { 0 })
+            .collect();
+
+        println!("Using version {:?}", code.version());
+
+        assert_eq!(code.version(), qrcode::Version::Normal(version as i16));
+
+        let inner = QRData::new(idata, version);
+        QR {
+            data: inner.data,
+            side: inner.side,
+            version,
+            functional: Rc::new(functional),
+        }
+    }
+
     pub fn make(data: &[u8], version: u32) -> QR {
         let code = qrcode::QrCode::with_version(
             data,
