@@ -1,4 +1,4 @@
 # qr-mogus
 
-![qr code linking to the repo](sample.png)
+![qr code linking to the repo](sample-link.png)
 
