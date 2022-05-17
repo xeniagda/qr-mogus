@@ -88,7 +88,7 @@ const MOG_WIDTH: usize = 6;
 const MOG_HEIGHT: usize = 7;
 
 fn get_mog_at(x: usize, y: usize) -> bool {
-    return MOGUS[(x % MOG_WIDTH) + (y % MOG_WIDTH) * MOG_WIDTH] == 1;
+    return MOGUS[(x % MOG_WIDTH) + (y % MOG_HEIGHT) * MOG_WIDTH] == 1;
 }
 
 fn main() {
